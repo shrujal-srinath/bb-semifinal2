@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en" data-color-scheme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Basketball Scoreboard Pro</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <audio id="buzzerSound" preload="auto">
+    <source src="https://r2cdn.perplexity.ai/audio/buzzer.mp3" type="audio/mpeg"/>
+  </audio>
+
+  <div class="app-container">
+    <!-- Landing View -->
+    <section id="landing-view" class="view container">
+      <header class="landing-header">
+        <div class="basketball-icon">🏀</div>
+        <h1 class="main-title">Basketball Scoreboard Pro</h1>
+        <p class="hero-subtitle">Create a game, run clocks, update scores, and track player stats in real time.</p>
+      </header>
+
+      <div class="landing-cards">
+        <article class="card landing-card">
+          <div class="card__body">
+            <div class="card-icon">👁️</div>
+            <h3>Enter a game code to spectate</h3>
+            <div class="form-group">
+              <label class="form-label" for="watchCodeInput">Game Code</label>
+              <input id="watchCodeInput" class="form-control" placeholder="6-digit code" maxlength="6"/>
+              <div id="codeValidationMessage" class="validation-message hidden"></div>
+            </div>
+            <div class="section-actions">
+              <button id="watchGameBtn" class="btn btn--primary" disabled>Watch Game</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="card landing-card">
+          <div class="card__body">
+            <div class="card-icon">🧑‍✈️</div>
+            <h3>Create and manage a new game</h3>
+            <div class="form-group">
+              <label class="form-label" for="hostPasswordInput">Host Password</label>
+              <input id="hostPasswordInput" class="form-control" type="password" placeholder="Min 4 characters"/>
+            </div>
+            <div class="section-actions">
+              <button id="createGameBtn" class="btn btn--primary">Create Game</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="card landing-card">
+          <div class="card__body">
+            <div class="card-icon">⚡</div>
+            <h3>Quick game without player rosters</h3>
+            <p class="top-scorer">Creates a friendly game with instant controls.</p>
+            <div class="section-actions">
+              <button id="quickGameBtn" class="btn btn--secondary">Start Quick Game</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Config View -->
+    <section id="config-view" class="view container hidden">
+      <div class="section-header">
+        <div>
+          <h2>Game Configuration</h2>
+          <div class="game-code-display">
+            <span>Code:</span>
+            <strong id="configGameCode"></strong>
+            <button id="copyConfigCode" class="btn btn--outline">Copy</button>
+          </div>
+        </div>
+        <button id="backToLandingFromConfig" class="btn btn--outline">Back</button>
+      </div>
+
+      <div class="config-grid">
+        <div class="card">
+          <div class="card__body">
+            <h4>Basics</h4>
+            <div class="form-group">
+              <label class="form-label" for="gameNameInput">Game Name</label>
+              <input id="gameNameInput" class="form-control" placeholder="e.g., U16 Semifinal"/>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="periodDurationSelect">Period Duration (min)</label>
+                <select id="periodDurationSelect" class="form-control">
+                  <option value="10">10</option>
+                  <option value="12" selected>12</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="shotClockSelect">Shot Clock (sec)</label>
+                <select id="shotClockSelect" class="form-control">
+                  <option value="0">Disabled</option>
+                  <option value="14">14</option>
+                  <option value="24" selected>24</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </div>
+            </div>
+            <div id="customShotClockGroup" class="form-group hidden">
+              <label class="form-label" for="customShotClock">Custom Shot Clock</label>
+              <input id="customShotClock" class="form-control" type="number" min="0" max="60" value="24"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__body">
+            <h4>Game Type</h4>
+            <div class="game-type-selection">
+              <label class="game-type-option">
+                <input type="radio" name="gameType" value="friendly" checked/>
+                <div class="game-type-card">
+                  <div class="game-type-icon">🤝</div>
+                  <h4>Friendly</h4>
+                  <p>No rosters required</p>
+                </div>
+              </label>
+              <label class="game-type-option">
+                <input type="radio" name="gameType" value="full"/>
+                <div class="game-type-card">
+                  <div class="game-type-icon">📊</div>
+                  <h4>Full Stats</h4>
+                  <p>Rosters & player stats</p>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__body">
+            <h4>Teams</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="teamAName">Team A</label>
+                <input id="teamAName" class="form-control" placeholder="Team A"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="teamBName">Team B</label>
+                <input id="teamBName" class="form-control" placeholder="Team B"/>
+              </div>
+            </div>
+
+            <div class="form-row color-picker-group">
+              <div class="form-group">
+                <label class="form-label" for="teamAColor">Team A Color</label>
+                <input id="teamAColor" class="form-control color-input" type="color" value="#FF6B35"/>
+              </div>
+              <div class="color-preview" id="teamAColorPreview"></div>
+
+              <div class="form-group">
+                <label class="form-label" for="teamBColor">Team B Color</label>
+                <input id="teamBColor" class="form-control color-input" type="color" value="#1B263B"/>
+              </div>
+              <div class="color-preview" id="teamBColorPreview"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-actions">
+        <button id="proceedToSetup" class="btn btn--primary">Continue</button>
+      </div>
+    </section>
+
+    <!-- Setup View -->
+    <section id="setup-view" class="view container hidden">
+      <div class="section-header">
+        <div>
+          <h2>Team Setup</h2>
+          <div class="game-code-display">
+            <span>Code:</span>
+            <strong id="setupGameCode"></strong>
+            <button id="copySetupCode" class="btn btn--outline">Copy</button>
+          </div>
+        </div>
+        <div class="section-actions">
+          <button id="backToConfig" class="btn btn--outline">Back</button>
+          <button id="skipRosterSetup" class="btn btn--secondary">Skip Rosters</button>
+          <button id="startGame" class="btn btn--primary">Start Game</button>
+        </div>
+      </div>
+
+      <div class="setup-grid">
+        <div class="card team-setup-card">
+          <div class="card__body">
+            <h3 id="teamASetupTitle">Team A</h3>
+            <div class="form-row">
+              <input id="teamAPlayerNumber" class="form-control" type="number" min="0" max="99" placeholder="Jersey #"/>
+              <input id="teamAPlayerName" class="form-control" placeholder="Name"/>
+              <select id="teamAPlayerPosition" class="form-control">
+                <option value="">Position</option>
+                <option>G</option><option>F</option><option>C</option>
+              </select>
+              <button id="addTeamAPlayer" class="btn btn--secondary">Add</button>
+            </div>
+            <div id="teamARoster" class="roster-list"></div>
+            <div class="roster-counter">Players: <span id="teamACount">0</span></div>
+          </div>
+        </div>
+
+        <div class="card team-setup-card">
+          <div class="card__body">
+            <h3 id="teamBSetupTitle">Team B</h3>
+            <div class="form-row">
+              <input id="teamBPlayerNumber" class="form-control" type="number" min="0" max="99" placeholder="Jersey #"/>
+              <input id="teamBPlayerName" class="form-control" placeholder="Name"/>
+              <select id="teamBPlayerPosition" class="form-control">
+                <option value="">Position</option>
+                <option>G</option><option>F</option><option>C</option>
+              </select>
+              <button id="addTeamBPlayer" class="btn btn--secondary">Add</button>
+            </div>
+            <div id="teamBRoster" class="roster-list"></div>
+            <div class="roster-counter">Players: <span id="teamBCount">0</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Control View -->
+    <section id="control-view" class="view container hidden">
+      <div class="control-header">
+        <div>
+          <h2 id="controlGameName">Basketball Game</h2>
+          <div class="game-code-display">
+            <span>Code:</span>
+            <strong id="controlGameCode"></strong>
+            <button id="copyControlCode" class="btn btn--outline">Copy</button>
+          </div>
+        </div>
+        <div class="control-actions">
+          <button id="goToViewer" class="btn btn--secondary">Open Viewer</button>
+          <button id="resetAllClocksBtn" class="btn btn--outline">Reset Clocks</button>
+          <button id="startGameBtn" class="btn btn--primary master-start-btn resume">START GAME</button>
+        </div>
+      </div>
+
+      <div class="scoreboard">
+        <div class="team-score" id="teamACol">
+          <h3 id="teamANameHdr">Team A</h3>
+          <div class="score-display" id="teamAScore">0</div>
+          <div id="teamATopScorer" class="top-scorer">No scorer yet</div>
+          <div class="score-controls">
+            <button class="btn score-btn" id="teamAPlus1">+1</button>
+            <button class="btn score-btn" id="teamAPlus2">+2</button>
+            <button class="btn score-btn" id="teamAPlus3">+3</button>
+            <button class="btn score-btn" id="teamAMinus1">-1</button>
+          </div>
+        </div>
+
+        <div class="clock-section">
+          <div class="period-display">Period: <span id="periodDisplay">1</span></div>
+          <div class="clock-display" id="clockDisplay">12:00</div>
+          <div class="master-clock-controls">
+            <div class="clock-control-row">
+              <button id="editClockBtn" class="btn btn--outline">Edit Game Clock</button>
+              <button id="nextPeriodBtn" class="btn btn--secondary">Next Period</button>
+              <button id="prevPeriodBtn" class="btn btn--secondary">Prev Period</button>
+            </div>
+          </div>
+
+          <div class="shot-clock-section" id="shotClockSection">
+            <div class="shot-clock-display" id="shotClockDisplay">24</div>
+            <div class="shot-clock-label">Shot Clock</div>
+            <div class="shot-clock-actions">
+              <button id="startShotClockBtn" class="btn btn--secondary">Start Shot Clock</button>
+              <button id="resetShot14Btn" class="btn btn--outline">Reset 14</button>
+              <button id="resetShot24Btn" class="btn btn--outline">Reset 24</button>
+              <button id="editShotClockBtn" class="btn btn--outline">Edit Shot</button>
+            </div>
+          </div>
+
+          <div class="possession-controls">
+            <button id="possessionTeamA" class="btn btn--secondary">Possession: Team A</button>
+            <button id="possessionTeamB" class="btn btn--secondary">Possession: Team B</button>
+          </div>
+        </div>
+
+        <div class="team-score" id="teamBCol">
+          <h3 id="teamBNameHdr">Team B</h3>
+          <div class="score-display" id="teamBScore">0</div>
+          <div id="teamBTopScorer" class="top-scorer">No scorer yet</div>
+          <div class="score-controls">
+            <button class="btn score-btn" id="teamBPlus1">+1</button>
+            <button class="btn score-btn" id="teamBPlus2">+2</button>
+            <button class="btn score-btn" id="teamBPlus3">+3</button>
+            <button class="btn score-btn" id="teamBMinus1">-1</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats (visible when gameType=full) -->
+      <section id="statsSection" class="stats-section">
+        <div class="stats-header">
+          <h3>Player Scoring</h3>
+          <div class="stats-controls">
+            <select id="statTeamSelect" class="form-control">
+              <option value="teamA">Team A</option>
+              <option value="teamB">Team B</option>
+            </select>
+          </div>
+        </div>
+        <div class="player-scoring-grid" id="playerScoringGrid"></div>
+
+        <div class="comprehensive-stats-section">
+          <h5>Box Score</h5>
+          <div class="stats-table-container">
+            <table class="comprehensive-stats-table" id="statsTable">
+              <thead>
+                <tr>
+                  <th class="sticky-col">#</th>
+                  <th class="sticky-col">Player</th>
+                  <th>PTS</th><th>FT</th><th>FG</th><th>3PT</th>
+                  <th>OREB</th><th>DREB</th><th>AST</th><th>STL</th>
+                  <th>BLK</th><th>TOV</th><th>FLS</th>
+                </tr>
+              </thead>
+              <tbody id="statsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- Viewer View -->
+    <section id="viewer-view" class="view container hidden">
+      <div class="viewer-scoreboard">
+        <div class="viewer-team">
+          <h2 id="viewerTeamAName">Team A</h2>
+          <div class="viewer-score" id="viewerTeamAScore">0</div>
+          <div id="viewerTeamATopScorer" class="viewer-top-scorer">No scorer yet</div>
+        </div>
+
+        <div class="viewer-center">
+          <div class="viewer-clock" id="viewerClock">12:00</div>
+          <div class="viewer-period">Period: <span id="viewerPeriod">1</span></div>
+          <div class="viewer-shot-clock" id="viewerShotClock">24</div>
+        </div>
+
+        <div class="viewer-team">
+          <h2 id="viewerTeamBName">Team B</h2>
+          <div class="viewer-score" id="viewerTeamBScore">0</div>
+          <div id="viewerTeamBTopScorer" class="viewer-top-scorer">No scorer yet</div>
+        </div>
+      </div>
+
+      <div class="viewer-info">
+        <div class="game-name" id="viewerGameName">Basketball Game</div>
+        <div class="possession-indicator" id="viewerPossession">Possession: Team A</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Shot Clock Violation Modal -->
+  <div id="shotClockViolation" class="violation-alert hidden">
+    <div class="violation-content">
+      <div class="violation-icon">⏱️</div>
+      <div class="violation-text">SHOT CLOCK VIOLATION</div>
+    </div>
+  </div>
+
+  <!-- Edit Game Clock Modal -->
+  <div id="editClockModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Edit Game Clock</h3>
+      <div class="form-row">
+        <input id="editMinutes" class="form-control" type="number" min="0" max="59"/>
+        <input id="editSeconds" class="form-control" type="number" min="0" max="59"/>
+      </div>
+      <div class="modal-actions">
+        <button id="cancelClockEdit" class="btn btn--secondary">Cancel</button>
+        <button id="saveClockEdit" class="btn btn--primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Shot Clock Modal -->
+  <div id="editShotClockModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Edit Shot Clock</h3>
+      <input id="editShotClockSeconds" class="form-control" type="number" min="0" max="60"/>
+      <div class="modal-actions">
+        <button id="cancelShotClockEdit" class="btn btn--secondary">Cancel</button>
+        <button id="saveShotClockEdit" class="btn btn--primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toasts -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
