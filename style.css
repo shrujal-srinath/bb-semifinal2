@@ -1,0 +1,22 @@
+/* Keep your original token and component CSS here (as provided),
+   ensuring all braces are balanced and stray ellipses are removed. */
+
+/* Minimal safe defaults for hidden/display */
+.view.hidden { display: none !important; }
+.view { display: block; }
+
+/* Basic containers */
+.container { max-width: 1024px; margin: 0 auto; padding: 24px; }
+
+/* Buttons, cards, forms, scoreboard, etc.
+   Keep your existing styles to preserve the design system. */
+
+/* Warning style toggle */
+.shot-clock-display.warning,
+#viewerShotClock.warning {
+  animation: shotClockWarning 1s ease-in-out infinite alternate;
+}
+
+/* Modals */
+.modal { display: flex; align-items: center; justify-content: center; }
+.modal.hidden { display: none !important; }
